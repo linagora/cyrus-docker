@@ -1,6 +1,16 @@
 # cyrus-docker
 
-This image contains a cyrus imap service.
+This image contains a cyrus imap service with support for the jmap protocol.
+It should be used only for development and testing purpose.
+
+to build it you can run the following command : 
+
+`docker build . -t cyrus-jmap`
+
+to run it : 
+
+`docker run -p 1080:80 -p 1143:143  cyrus-jmap`
+
 
 Three users belong to the virtual test domain :
 
@@ -8,34 +18,30 @@ Three users belong to the virtual test domain :
  * bob with 'bob' as a password
  * alice with 'alice' as a password
 
-They can authenticate but they don't have any mailbox.
+They can authenticate in imap but they don't have any mailbox.
+
+To be able to be authenticated with jmap they need to have a mailbox.
+
 
 You can create some mailboxes with some imap commands :
 
-```
-* OK [CAPABILITY IMAP4rev1 LITERAL+ ID ENABLE AUTH=PLAIN SASL-IR] test Cyrus IMAP v2.4.17-caldav-beta10-Debian-2.4.17+caldav~beta10-18 server ready
-. LOGIN cyrus cyrus
-. OK [CAPABILITY IMAP4rev1 LITERAL+ ID ENABLE ACL RIGHTS=kxte QUOTA MAILBOX-REFERRALS NAMESPACE UIDPLUS NO_ATOMIC_RENAME UNSELECT CHILDREN MULTIAPPEND BINARY CATENATE CONDSTORE ESEARCH SORT SORT=MODSEQ SORT=DISPLAY THREAD=ORDEREDSUBJECT THREAD=REFERENCES ANNOTATEMORE LIST-EXTENDED WITHIN QRESYNC SCAN XLIST X-REPLICATION URLAUTH URLAUTH=BINARY LOGINDISABLED COMPRESS=DEFLATE IDLE] User logged in SESSIONID=<cyrus-18-1432282885-1>
-A CREATE user.cyrus
-A OK Completed
-B CREATE user.bob
-B OK Completed
-C CREATE user.alice
-C OK Completed
-D LIST "" "*" 
-* LIST (\HasNoChildren) "." INBOX
-* LIST (\HasNoChildren) "." user.alice
-* LIST (\HasNoChildren) "." user.bob
-D OK Completed (0.000 secs 4 calls)
-```
+`telnet localhost 1143`
 
-And then with alice :
+`A1 LOGIN bob bob`
+
+`A2 CREATE INBOX`
+
+
+You can then execute JMAP requests, for example to list the mailbox of 'bob'
 
 ```
-* OK [CAPABILITY IMAP4rev1 LITERAL+ ID ENABLE AUTH=PLAIN SASL-IR] test Cyrus IMAP v2.4.17-caldav-beta10-Debian-2.4.17+caldav~beta10-18 server ready
-. LOGIN alice alice
-. OK [CAPABILITY IMAP4rev1 LITERAL+ ID ENABLE ACL RIGHTS=kxte QUOTA MAILBOX-REFERRALS NAMESPACE UIDPLUS NO_ATOMIC_RENAME UNSELECT CHILDREN MULTIAPPEND BINARY CATENATE CONDSTORE ESEARCH SORT SORT=MODSEQ SORT=DISPLAY THREAD=ORDEREDSUBJECT THREAD=REFERENCES ANNOTATEMORE LIST-EXTENDED WITHIN QRESYNC SCAN XLIST X-REPLICATION URLAUTH URLAUTH=BINARY LOGINDISABLED COMPRESS=DEFLATE IDLE] User logged in SESSIONID=<cyrus-18-1432282929-1>
-A LIST "" "*"
-* LIST (\HasNoChildren) "." INBOX
-A OK Completed (0.000 secs 2 calls)
+curl -X POST \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json" \
+    --user bob:bob \
+    -d '{
+    "using": [ "urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail" ],
+    "methodCalls": [[ "Mailbox/get", { }, "c1" ]]
+    }' \
+    http://localhost:1080/jmap/
 ```
