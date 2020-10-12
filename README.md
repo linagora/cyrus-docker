@@ -45,3 +45,12 @@ curl -X POST \
     }' \
     http://localhost:1080/jmap/
 ```
+
+And to get the JMAP session
+
+```
+curl -X GET \
+    -H "Content-Type: application/json" \
+    --user bob:bob \
+    http://localhost:1080/jmap/
+```
