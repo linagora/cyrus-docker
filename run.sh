@@ -1,6 +1,9 @@
 #!/bin/sh
 /etc/init.d/rsyslog restart
 /etc/init.d/saslauthd start 
+hostname cyrus.domain
+/etc/init.d/sendmail start 
+
 # create some default user, cyrus is configured as admin in imapd.conf
 echo 'cyrus' | saslpasswd2 -p -c cyrus && testsaslauthd -u cyrus -p cyrus 
 echo 'bob' | saslpasswd2 -p -c bob && testsaslauthd -u bob -p bob 

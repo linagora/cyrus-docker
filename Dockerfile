@@ -57,9 +57,29 @@ RUN chmod 750 /var/lib/cyrus /var/spool/cyrus /run/cyrus
 
 RUN sudo -u cyrus ./tools/mkimap
 
+# install sendmail for SMTP
+## hack to set hostname for sendmail https://stackoverflow.com/questions/28898787/how-to-handle-specific-hostname-like-h-option-in-dockerfile
+#RUN mv /usr/bin/hostname{,.bkp}; \
+#  echo "echo cyrus.domain" > /usr/bin/hostname; \
+#  chmod +x /usr/bin/hostname
+#RUN sudo hostname cyrus.domain
+#RUN echo "127.0.0.1 cyrus.domain cyrus" >> /etc/hosts
+
+RUN apt install -y sendmail
+ADD sendmail.mc /etc/mail/sendmail.mc
+RUN sendmailconfig
+
+##end of hack
+#RUN mv /usr/bin/hostname{.bkp,}
+
+RUN mkdir -p /var/run/cyrus/socket
+RUN chown cyrus:mail /var/run/cyrus/socket
+RUN chmod 750 /var/run/cyrus/socket
+
 ## expose ports
 EXPOSE 143
 EXPOSE 80
+EXPOSE 25
 
 ## Launch cyrus
 ADD run.sh run.sh
