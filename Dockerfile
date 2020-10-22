@@ -57,9 +57,24 @@ RUN chmod 750 /var/lib/cyrus /var/spool/cyrus /run/cyrus
 
 RUN sudo -u cyrus ./tools/mkimap
 
+# Install sendmail
+
+## Hack to allow to install sendmail quick, else refreshing aliases takes minutes
+## must be in one command else Docker creates a new image with a new /etc/hosts during the build
+RUN echo "127.0.0.1 $HOSTNAME $HOSTNAME.localdomain" >> /etc/hosts && apt install -y sendmail
+ADD sendmail.mc /etc/mail/sendmail.mc
+RUN echo "127.0.0.1 $HOSTNAME $HOSTNAME.localdomain" >> /etc/hosts && sendmailconfig
+
+## create socket directory to communicate between Sendmail et Cyrus by LMTP
+
+RUN mkdir -p /var/run/cyrus/socket
+RUN chown cyrus:mail /var/run/cyrus/socket
+RUN chmod 750 /var/run/cyrus/socket
+
 ## expose ports
 EXPOSE 143
 EXPOSE 80
+EXPOSE 25
 
 ## Launch cyrus
 ADD run.sh run.sh

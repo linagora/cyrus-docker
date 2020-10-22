@@ -9,7 +9,9 @@ to build it you can run the following command :
 
 to run it : 
 
-`docker run -p 1080:80 -p 1143:143  cyrus-jmap`
+`docker run -p 1080:80 -p 1143:143 -p 1025:25 --hostname cyrus.domain --name cyrus cyrus-jmap`
+
+The hostname is important in particular for sendmail and must contain a dot, else sendmail will be very slow.
 
 
 Three users belong to the virtual test domain :
