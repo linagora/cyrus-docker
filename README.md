@@ -9,7 +9,7 @@ to build it you can run the following command :
 
 to run it : 
 
-`docker run -p 1080:80 -p 1143:143 -p 1025:25 --privileged  --name cyrus.domain cyrus-jmap`
+`docker run -p 1080:80 -p 1143:143 -p 1025:25 --hostname cyrus.domain --name cyrus cyrus-jmap`
 
 
 Three users belong to the virtual test domain :
