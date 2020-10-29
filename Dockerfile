@@ -63,6 +63,7 @@ RUN sudo -u cyrus ./tools/mkimap
 ## must be in one command else Docker creates a new image with a new /etc/hosts during the build
 RUN echo "127.0.0.1 $HOSTNAME $HOSTNAME.localdomain" >> /etc/hosts && apt install -y sendmail
 ADD sendmail.mc /etc/mail/sendmail.mc
+RUN echo "127.0.0.1 $HOSTNAME $HOSTNAME.localdomain" >> /etc/hosts && sendmailconfig
 
 ## create socket directory to communicate between Sendmail et Cyrus by LMTP
 

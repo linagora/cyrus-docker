@@ -99,7 +99,6 @@ include(`/etc/mail/m4/provider.m4')dnl
 dnl #
 dnl # Masquerading options
 FEATURE(`always_add_domain')dnl
-MASQUERADE_AS(`MY_DOCKER_HOSTNAME')dnl
 FEATURE(`allmasquerade')dnl
 FEATURE(`masquerade_envelope')dnl
 dnl #
