@@ -16,17 +16,17 @@ libsasl2-modules sasl2-bin libsasl2-modules-gssapi-mit \
 libchardet1 libnghttp2-dev libwslay-dev ssl-cert
 
 
-RUN apt-get -y  install libxapian-dev
+RUN apt-get -y  install libxapian-dev unzip
 
 # download cyrus
-RUN wget https://github.com/cyrusimap/cyrus-imapd/releases/download/cyrus-imapd-3.2.3/cyrus-imapd-3.2.3.tar.gz
-RUN tar -xzvf cyrus-imapd-3.2.3.tar.gz
+RUN wget https://github.com/cyrusimap/cyrus-imapd/archive/master.zip
+RUN unzip master.zip
 
 # configure cyrus
-WORKDIR /cyrus-imapd-3.2.3
+WORKDIR /cyrus-imapd-master
 
 RUN autoreconf -i -s 
-RUN ./configure --enable-http --enable-jmap --enable-xapian --prefix=/usr/cyrus
+RUN ./configure --enable-http --enable-jmap --enable-xapian --prefix=/usr/cyrus --enable-autocreate
 RUN make
 RUN make install
 
