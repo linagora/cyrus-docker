@@ -1,6 +1,6 @@
-# cyrus-docker
+# cyrus-docker with ldap authentication
 
-This image contains a cyrus imap service with support for the jmap protocol.
+This image contains a cyrus imap service with support for the jmap protocol and with LDAP authentication.
 It should be used only for development and testing purpose.
 
 to build it you can run the following command : 
@@ -13,14 +13,15 @@ to run it :
 
 The hostname is important in particular for sendmail and must contain a dot, else sendmail will be very slow.
 
+The default `saslauthd.conf` provide the authentication configuration to connect to the ldap within the
+development docker-compose of open-paas.
 
-Three users belong to the virtual test domain :
+To configure how to access your LDAP repository you should mount your `saslauthd.conf` file by adding
+the following argument to the `docker run` command :
 
- * cyrus with 'cyrus' as a password, admin account
- * bob with 'bob' as a password
- * alice with 'alice' as a password
+`-v myLocalDirectory/saslauthd.conf:/etc/saslauthd.conf`
 
-They can authenticate in imap but they don't have any mailbox.
+The users found in the LDAP repository can authenticate in imap but they don't have any mailbox.
 
 To be able to be authenticated with jmap they need to have a mailbox.
 
@@ -29,18 +30,18 @@ You can create some mailboxes with some imap commands :
 
 `telnet localhost 1143`
 
-`A1 LOGIN bob bob`
+`A1 LOGIN myUser myUserPassword`
 
 `A2 CREATE INBOX`
 
 
-You can then execute JMAP requests, for example to list the mailbox of 'bob'
+You can then execute JMAP requests, for example to list the mailbox of 'myUser'
 
 ```
 curl -X POST \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
-    --user bob:bob \
+    --user myUser:myUserPassword \
     -d '{
     "using": [ "urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail" ],
     "methodCalls": [[ "Mailbox/get", { }, "c1" ]]
@@ -53,10 +54,6 @@ And to get the JMAP session
 ```
 curl -X GET \
     -H "Content-Type: application/json" \
-    --user bob:bob \
+    --user myUser:myUserPassword \
     http://localhost:1080/jmap/
 ```
-
-## Authentication with LDAP
-
-If you need a cyrus service supporting LDAP authentication, please have a look at the `jmap` folder.
