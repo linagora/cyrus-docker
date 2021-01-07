@@ -18,6 +18,8 @@ libchardet1 libnghttp2-dev libwslay-dev ssl-cert
 
 RUN apt-get -y  install libxapian-dev unzip
 
+RUN apt -y install libldap2-dev
+
 # download cyrus
 RUN wget https://github.com/cyrusimap/cyrus-imapd/archive/master.zip
 RUN unzip master.zip
@@ -25,7 +27,7 @@ RUN unzip master.zip
 # configure cyrus
 WORKDIR /cyrus-imapd-master
 
-RUN autoreconf -i -s 
+RUN autoreconf -i -s
 RUN ./configure --enable-http --enable-jmap --enable-xapian --prefix=/usr/cyrus --enable-autocreate
 RUN make
 RUN make install
@@ -50,6 +52,7 @@ RUN groupadd -fr sasl
 
 RUN usermod -aG sasl cyrus
 ADD saslauthd /etc/default/saslauthd
+ADD saslauthd.conf /etc/saslauthd.conf
 # cyrus file storage
 RUN mkdir -p /var/lib/cyrus /var/spool/cyrus /run/cyrus
 RUN chown -R cyrus:mail /var/lib/cyrus /var/spool/cyrus /run/cyrus
@@ -57,14 +60,12 @@ RUN chmod 750 /var/lib/cyrus /var/spool/cyrus /run/cyrus
 
 RUN sudo -u cyrus ./tools/mkimap
 
-# Install sendmail
-
 ## Hack to allow to install sendmail quick, else refreshing aliases takes minutes
 ## must be in one command else Docker creates a new image with a new /etc/hosts during the build
 RUN echo "127.0.0.1 $HOSTNAME $HOSTNAME.localdomain" >> /etc/hosts && apt install -y sendmail
 ADD sendmail.mc /etc/mail/sendmail.mc
-RUN echo "127.0.0.1 $HOSTNAME $HOSTNAME.localdomain" >> /etc/hosts && sendmailconfig
 
+RUN  echo "127.0.0.1 $HOSTNAME $HOSTNAME.localdomain" >> /etc/hosts && sendmailconfig
 ## create socket directory to communicate between Sendmail et Cyrus by LMTP
 
 RUN mkdir -p /var/run/cyrus/socket
